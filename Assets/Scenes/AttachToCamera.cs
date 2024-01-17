@@ -9,7 +9,8 @@ public class AttachToCamera : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
+        cameraTransform = Camera.main.transform;
+        directionalLight = GetComponent<Light>();
     }
 
     // Update is called once per frame
@@ -17,5 +18,11 @@ public class AttachToCamera : MonoBehaviour
     {
         directionalLight.transform.position = cameraTransform.position;
         directionalLight.transform.rotation = cameraTransform.rotation;
+
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            Debug.Log("Light position: " + directionalLight.transform.position);
+            Debug.Log("Light point to: " + directionalLight.transform.forward);
+        }
     }
 }
