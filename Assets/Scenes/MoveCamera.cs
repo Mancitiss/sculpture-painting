@@ -8,7 +8,9 @@ public class MoveCamera : MonoBehaviour
     public Transform target;  // The target point (center of the sphere)
     public float rotationSpeed {get; set;}   // Adjust the rotation speed as needed
     public float radius;  // Fixed radius from the target
-    public float zoomSpeed = 0.1f;
+    public float zoomSpeed;
+
+    public bool isFocus;
 
     void Start()
     {
@@ -19,48 +21,92 @@ public class MoveCamera : MonoBehaviour
         transform.position = target.position + new Vector3(0, 0, -10);
         transform.LookAt(target.position);
 
-        this.rotationSpeed = 5f;
+        this.rotationSpeed = 5.0f;
         // calculate distance from camera to target
         radius = Vector3.Distance(transform.position, target.position);
+
+        this.isFocus = true;
+        this.zoomSpeed = 100.0f;
     }
 
     void Update()
     {
-        // Check for right mouse button click
-        if (Input.GetMouseButton(1))
+        if (Input.GetKeyDown(KeyCode.F))
         {
-            // Get mouse input
-            float mouseX = Input.GetAxis("Mouse X");
-            float mouseY = Input.GetAxis("Mouse Y");
+            this.isFocus = !this.isFocus;
+        }
+        if (isFocus){
+            // Check for right mouse button click
+            if (Input.GetMouseButton(1))
+            {
+                // Get mouse input
+                float mouseX = Input.GetAxis("Mouse X");
+                float mouseY = Input.GetAxis("Mouse Y");
 
-            // Rotate the camera around the target
-            RotateCamera(mouseX, mouseY);
+                // Rotate the camera around the target
+                RotateCamera(mouseX, mouseY);
+            }
+
+            // print camera position
+
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                Debug.Log("Camera position: " + transform.position);
+                Debug.Log("Camera point to: " + transform.forward);
+            }
+        }
+        else {
+            // free camera, with WASD to move up down left right, and mouse scroll to zoom in/out
+
+            if (Input.GetKey(KeyCode.A))
+            {
+                transform.position -= transform.right * Time.deltaTime * 10;
+            }
+            if (Input.GetKey(KeyCode.D))
+            {
+                transform.position += transform.right * Time.deltaTime * 10;
+            }
+            if (Input.GetKey(KeyCode.E))
+            {
+                transform.position += transform.up * Time.deltaTime * 10;
+            }
+            if (Input.GetKey(KeyCode.Q))
+            {
+                transform.position -= transform.up * Time.deltaTime * 10;
+            }
+
+            // right mouse button to rotate
+            if (Input.GetMouseButton(1))
+            {
+                // Get mouse input
+                float mouseX = Input.GetAxis("Mouse X");
+                float mouseY = Input.GetAxis("Mouse Y");
+
+                // Rotate the camera, not around anything
+                transform.RotateAround(transform.position, Vector3.up, mouseX * rotationSpeed);
+                transform.RotateAround(transform.position, transform.right, -mouseY * rotationSpeed);
+
+            }
         }
 
-        
+        if (Input.GetKey(KeyCode.W))
+        {
+            transform.position += transform.forward * Time.deltaTime * 10;
+        }
+        if (Input.GetKey(KeyCode.S))
+        {
+            transform.position -= transform.forward * Time.deltaTime * 10;
+        }
         // Zoom In/Out with the mouse scroll wheel
         float scrollWheel = Input.GetAxis("Mouse ScrollWheel");
         if (scrollWheel != 0) ZoomCamera(scrollWheel);
 
-        // print camera position
-
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            Debug.Log("Camera position: " + transform.position);
-            Debug.Log("Camera point to: " + transform.forward);
-        }
-
+        this.radius = Vector3.Distance(transform.position, target.position);
     }
 
     void ZoomCamera(float zoomAmount)
     {
-        // Adjust the camera's position based on the scroll wheel input
-        Vector3 zoomDirection = transform.forward;
-
-        transform.position += zoomDirection * zoomAmount * zoomSpeed;
-
-        // Calculate the new radius
-        this.radius = Vector3.Distance(transform.position, target.position);
+        transform.position += transform.forward * zoomAmount * zoomSpeed * Time.deltaTime;
     }
 
     void RotateCamera(float mouseX, float mouseY)
